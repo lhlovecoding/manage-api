@@ -73,3 +73,9 @@ exports.reg_reg_mobile = {
     mobile,
   },
 }
+exports.reg_login_schema = {
+  body: {
+    username,
+    password,
+  },
+}

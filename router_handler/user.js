@@ -83,7 +83,32 @@ exports.regUser = (req, res) => {
 
 // 登录的处理函数
 exports.login = (req, res) => {
-  res.send('login OK')
+  const userinfo = req.body
+  new Promise((resolve, reject) => {
+    const sql = `select * from user where username=?`
+    db.query(sql, userinfo.username, function (err, results) {
+      // 执行 SQL 语句失败
+      if (err) reject('查询用户失败！')
+      // 执行 SQL 语句成功，但是查询到数据条数不等于 1
+      if (results.length !== 1) reject('未查询到用户！')
+      // TODO：判断用户输入的登录密码是否和数据库中的密码一致
+      resolve(results[0])
+    })
+  })
+    .then((user) => {
+      // 比对密码
+      const compareResult = bcrypt.compareSync(userinfo.password, user.password)
+      if (!compareResult) {
+        res.cw('登录失败！')
+      }
+      // 登录成功，生成 Token 字符串
+      console.log(user)
+      // 登录成功
+      res.cg('登录成功！')
+    })
+    .catch((err) => {
+      res.cw(err)
+    })
 }
 // 获取验证码的处理函数
 exports.getCaptcha = (req, res) => {

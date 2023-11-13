@@ -1,5 +1,6 @@
 // 导入 express 模块
 const express = require('express')
+const http = require('http')
 // 导入 cors 中间件
 const cors = require('cors')
 const joi = require('joi')
@@ -46,6 +47,8 @@ app.use(function (err, req, res, next) {
   // 未知错误
   res.cw(err)
 })
-app.listen(3007, function () {
+const server = http.createServer(app)
+server.keepAliveTimeout = 60000 * 2
+server.listen(3007, function () {
   console.log('api server running at http://127.0.0.1:3007')
 })

@@ -7,7 +7,11 @@ const userHandler = require('../router_handler/user')
 // 1. 导入验证表单数据的中间件
 const expressJoi = require('@escook/express-joi')
 // 2. 导入需要的验证规则对象
-const { reg_reg_schema, reg_reg_mobile } = require('../schema/user')
+const {
+  reg_reg_schema,
+  reg_reg_mobile,
+  reg_login_schema,
+} = require('../schema/user')
 
 // 注册新用户
 // 3. 在注册新用户的路由中，声明局部中间件，对当前请求中携带的数据进行验证
@@ -15,7 +19,7 @@ const { reg_reg_schema, reg_reg_mobile } = require('../schema/user')
 // 3.2 数据验证失败后，终止后续代码的执行，并抛出一个全局的 Error 错误，进入全局错误级别中间件中进行处理
 router.post('/register', expressJoi(reg_reg_schema), userHandler.regUser)
 // 登录
-// router.post('/login', userHandler.login)
+router.post('/login', expressJoi(reg_login_schema), userHandler.login)
 //获取验证码
 router.get('/captcha', expressJoi(reg_reg_mobile), userHandler.getCaptcha)
 module.exports = router
