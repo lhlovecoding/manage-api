@@ -8,74 +8,42 @@ const joi = require('joi')
  * required() 值是必填项，不能为 undefined
  * pattern(正则表达式) 值必须符合正则表达式的规则
  */
-
-// 用户名的验证规则
-const username = joi
+// 商品名称的验证规则
+const title = joi.string().required().error(new Error('商品名称不符合规则'))
+// 图片的验证规则
+const thumbnail = joi.string().required().error(new Error('图片不符合规则'))
+// 排序的验证规则
+const sort = joi.number().error(new Error('排序不符合规则'))
+// 价格的验证规则
+const price = joi.number().required().error(new Error('价格不符合规则'))
+// 库存的验证规则
+const stock = joi.number().required().error(new Error('库存不符合规则'))
+// 销量的验证规则
+const actual_sales = joi.number().required().error(new Error('销量不符合规则'))
+// 状态的验证规则 必须为这几个值'on_shelf','off_shelf','recycle_bin'
+const status = joi
   .string()
-  .alphanum()
-  .min(4)
-  .max(10)
+  .valid('on_shelf', 'off_shelf', 'recycle_bin')
   .required()
-  .error(new Error('用户名不符合规则'))
-// 密码的验证规则
-const password = joi
-  .string()
-  .pattern(/^[\S]{6,12}$/)
+  .error(new Error('状态不符合规则'))
+// 类型的验证规则 必须为1或2
+const type = joi
+  .number()
+  .valid(1, 2)
   .required()
-  .error(new Error('密码不符合规则'))
-// 邮件的验证规则
-const email = joi.string().email().required().error(new Error('邮箱不符合规则'))
-// 手机号的验证规则
-const mobile = joi
-  .string()
-  .pattern(/^1[3456789]\d{9}$/)
-  .required()
-  .error(function (errors) {
-    errors.forEach((err) => {
-      switch (err.code) {
-        case 'string.pattern.base':
-          err.message = '手机号格式不正确'
-          break
-        case 'any.required':
-          err.message = '手机号为必填项'
-          break
-        default:
-          break
-      }
-    })
-    return errors
-  })
-// QQ号的验证规则
-const qq = joi
-  .string()
-  .pattern(/^\d{5,12}$/)
-  .required()
-  .error(new Error('QQ号不符合规则'))
-const captcha = joi
-  .string()
-  .pattern(/^\w{4}$/)
-  .required()
-  .error(new Error('验证码不符合规则'))
-// 注册和登录表单的验证规则对象
-exports.reg_reg_schema = {
-  // 表示需要对 req.body 中的数据进行验证
+  .error(new Error('类型不符合规则'))
+// 分类的验证规则
+const category = joi.number().required().error(new Error('分类不符合规则'))
+exports.reg_add_goods_schema = {
   body: {
-    username,
-    password,
-    email,
-    mobile,
-    qq,
-    captcha,
-  },
-}
-exports.reg_reg_mobile = {
-  query: {
-    mobile,
-  },
-}
-exports.reg_login_schema = {
-  body: {
-    username,
-    password,
+    title,
+    thumbnail,
+    sort,
+    price,
+    stock,
+    actual_sales,
+    status,
+    type,
+    category,
   },
 }

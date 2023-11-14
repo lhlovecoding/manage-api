@@ -10,11 +10,15 @@ const expressJoi = require('@escook/express-joi')
 const { reg_add_goods_schema } = require('../schema/goods')
 
 //商品管理的增删改查
-// router.post('/', goodsHandler.addGoods)
+router.post('/', expressJoi(reg_add_goods_schema), goodsHandler.addGoods)
 router.get('/', goodsHandler.getGoods)
-// router.get('/:id', goodsHandler.getGoodsById)
-// router.put('/:id', goodsHandler.updateGoodsById)
-// router.delete('/:id', goodsHandler.deleteGoodsById)
+router.get('/:id', goodsHandler.getGoodsById)
+router.put(
+  '/:id',
+  expressJoi(reg_add_goods_schema),
+  goodsHandler.updateGoodsById
+)
+router.delete('/:id', goodsHandler.deleteGoodsById)
 //筛选商品
 // router.get('/search', goodsHandler.searchGoods)
 

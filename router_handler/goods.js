@@ -61,3 +61,95 @@ exports.getGoods = async (req, res) => {
     return res.cw(error)
   }
 }
+
+//添加商品
+exports.addGoods = async (req, res) => {
+  try {
+    //接受参数
+    const goodsInfo = req.body
+    //构建sql
+    const sql = `insert into goods set ?`
+    //执行sql
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, goodsInfo, function (err, results) {
+        if (err) return reject(err)
+        if (results.affectedRows !== 1) return reject('添加商品失败')
+        resolve(results)
+      })
+    })
+    //返回数据
+    return res.cg('添加商品成功', 200, { id: results.insertId })
+  } catch (error) {
+    return res.cw(error)
+  }
+}
+//获取商品详情
+exports.getGoodsById = async (req, res) => {
+  try {
+    //获取id参数
+    const { id } = req.params
+    //构建sql
+    const sql = `select * from goods where id=?`
+    //执行sql
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, id, function (err, results) {
+        if (err) return reject(err)
+        if (results.length !== 1) return reject('获取商品失败')
+        resolve(results[0])
+      })
+    })
+    //返回数据
+    return res.cg('获取商品详情成功', 200, results)
+  } catch (error) {
+    return res.cw(error)
+  }
+}
+//更新商品
+exports.updateGoodsById = async (req, res) => {
+  try {
+    //接收id参数
+    const { id } = req.params
+    //检查id
+    if (!id || isNaN(id)) return res.cw('商品id不合法')
+    //接收参数
+    const goodsInfo = req.body
+    //构建sql
+    const sql = `update goods set ? where id=?`
+    //执行sql
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, [goodsInfo, id], function (err, results) {
+        if (err) return reject(err)
+        if (results.affectedRows !== 1) return reject('更新商品失败')
+        resolve(results)
+      })
+    })
+    //返回数据
+    return res.cg('更新商品成功', 200, { id })
+  } catch (error) {
+    return res.cw(error)
+  }
+}
+//删除商品
+exports.deleteGoodsById = async (req, res) => {
+  try {
+    //接收id参数
+    const { id } = req.params
+    //检查id
+    if (!id || isNaN(id)) return res.cw('商品id不合法')
+    //构建sql
+    const sql = `delete from goods where id=?`
+    //执行sql
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, id, function (err, results) {
+        if (err) return reject(err)
+        if (results.affectedRows !== 1) return reject('删除商品失败')
+        resolve(results)
+      })
+    })
+    console.log(results)
+    //返回数据
+    return res.cg('删除商品成功', 200, { id })
+  } catch (error) {
+    return res.cw(error)
+  }
+}
