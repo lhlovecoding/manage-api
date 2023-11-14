@@ -101,79 +101,107 @@ exports.regUser = async (req, res) => {
 }
 
 // 登录的处理函数
-exports.login = (req, res) => {
-  const userinfo = req.body
-  new Promise((resolve, reject) => {
+exports.login = async (req, res) => {
+  try {
+    const userinfo = req.body
     const sql = `select * from user where username=?`
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, userinfo.username, function (err, results) {
+        if (err) {
+          reject('查询用户失败！')
+        }
+        if (results.length !== 1) {
+          reject('未查询到用户！')
+        }
+        resolve(results[0])
+      })
+    })
 
-    db.query(sql, userinfo.username, function (err, results) {
-      // 执行 SQL 语句失败
-      if (err) reject('查询用户失败！')
-      // 执行 SQL 语句成功，但是查询到数据条数不等于 1
-      if (results.length !== 1) reject('未查询到用户！')
-      // TODO：判断用户输入的登录密码是否和数据库中的密码一致
-      resolve(results[0])
+    // 比对密码
+    const compareResult = bcrypt.compareSync(
+      userinfo.password,
+      results.password
+    )
+    if (!compareResult) {
+      return res.cw('密码错误,登录失败！')
+    }
+
+    // 登录成功，生成 Token 字符串
+    const userdata = {
+      username: results.username,
+      id: results.id,
+      mobile: results.mobile,
+      email: results.email,
+      qq: results.qq,
+    }
+    // 生成 Token 字符串
+    const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
+      expiresIn: 60, // token 有效期为 10 分钟
     })
-  })
-    .then((user) => {
-      // 比对密码
-      const compareResult = bcrypt.compareSync(userinfo.password, user.password)
-      if (!compareResult) {
-        return res.cw('密码错误,登录失败！')
-      }
-      // 登录成功，生成 Token 字符串
-      const userdata = {
-        username: user.username,
-        id: user.id,
-        mobile: user.mobile,
-        email: user.email,
-        qq: user.qq,
-      }
-      // 生成 Token 字符串
-      const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
-        expiresIn: 60, // token 有效期为 10 个小时
-      })
-      return res.cg('登录成功！', 200, {
-        // 为了方便客户端使用 Token，在服务器端直接拼接上 Bearer 的前缀
-        token: 'Bearer ' + tokenStr,
-      })
+    return res.cg('登录成功！', 200, {
+      // 为了方便客户端使用 Token，在服务器端直接拼接上 Bearer 的前缀
+      token: 'Bearer ' + tokenStr,
     })
-    .catch((err) => {
-      return res.cw(err)
-    })
+  } catch (error) {
+    return res.cw(error)
+  }
 }
 // 获取验证码的处理函数
-exports.getCaptcha = (req, res) => {
-  // 生成验证码
-  const captcha = svgCaptcha.create({
-    size: 4, // 字符数
-    ignoreChars: 'abcdefghijklmnopqrstuvwxyz', // 过滤字符
-    noise: 3, // 干扰线条数
-    color: true,
-    background: '#fff', // 背景颜色
-  })
-  // 保存验证码到 mysql数据库中
-  const sql = 'insert into captcha set ?'
-  db.query(
-    sql,
-    { mobile: req.query.mobile, code: captcha.text },
-    (err, results) => {
-      if (err) return res.cw(err)
-      if (results.affectedRows !== 1) return res.cw('保存验证码到数据库失败！')
-    }
-  )
-  res.setHeader('content-type', 'text/html;charset=utf-8;')
-  //   res.setHeader("content-type", "image/svg+xml;");
-  res.end(captcha.data)
+exports.getCaptcha = async (req, res) => {
+  try {
+    // 生成验证码
+    const captcha = svgCaptcha.create({
+      size: 4, // 字符数
+      ignoreChars: 'abcdefghijklmnopqrstuvwxyz', // 过滤字符
+      noise: 3, // 干扰线条数
+      color: true,
+      background: '#fff', // 背景颜色
+    })
+
+    // 保存验证码到 mysql 数据库中
+    const sql = 'insert into captcha set ?'
+    await new Promise((resolve, reject) => {
+      db.query(
+        sql,
+        { mobile: req.query.mobile, code: captcha.text },
+        function (err, results) {
+          if (err) {
+            reject(err)
+          }
+          if (results.affectedRows !== 1) {
+            reject('保存验证码到数据库失败！')
+          }
+          resolve()
+        }
+      )
+    })
+
+    res.setHeader('content-type', 'text/html;charset=utf-8;')
+    res.end(captcha.data)
+  } catch (error) {
+    return res.cw(error)
+  }
 }
 
 //获取用户信息
-exports.getUserInfo = (req, res) => {
-  const sql =
-    'select id,username,email,mobile,qq,created_at,updated_at from user where id=?'
-  db.query(sql, req.user.id, (err, results) => {
-    if (err) return res.cw(err)
-    if (results.length !== 1) return res.cw('获取用户信息失败！')
-    return res.cg('获取用户信息成功！', 200, results[0])
-  })
+exports.getUserInfo = async (req, res) => {
+  try {
+    const sql =
+      'select id,username,email,mobile,qq,created_at,updated_at from user where id=?'
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, req.user.id, function (err, results) {
+        if (err) {
+          reject(err)
+        }
+        if (results.length !== 1) {
+          reject('获取用户信息失败！')
+        }
+        resolve(results[0])
+      })
+    })
+
+    return res.cg('获取用户信息成功！', 200, results)
+  } catch (error) {
+    return res.cw(error)
+  }
 }
