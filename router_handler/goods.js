@@ -18,8 +18,8 @@ exports.getGoods = async (req, res) => {
       sql += `and category_id=${params.category_id} `
     }
     //判断是否有关键词
-    if (params.key) {
-      sql += `and title like '%${params.key}%' `
+    if (params.title) {
+      sql += `and title like '%${params.title}%' `
     }
     //判断商品是什么类型 实物 虚拟
     if (params.type) {
