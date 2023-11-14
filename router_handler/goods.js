@@ -2,7 +2,8 @@
  * 在这里定义和用户相关的路由处理函数，供 /router/user.js 模块进行调用
  */
 const db = require('../db/index')
-
+// 引入dayjs
+const dayjs = require('dayjs')
 //获取商品列表-带分页
 exports.getGoods = async (req, res) => {
   try {
@@ -40,12 +41,19 @@ exports.getGoods = async (req, res) => {
     })
     //分页
     sql += ` limit ${(params.page - 1) * params.limit},${params.limit}`
+    //格式化时间
+
     //查询数据
     const data = await new Promise((resolve, reject) => {
       db.query(sql, function (err, results) {
         if (err) return reject(err)
         resolve(results)
       })
+    })
+    //把数据的时间格式化为 年-月-日 时:分:秒
+    data.forEach((item) => {
+      item.create_time = dayjs(item.create_time).format('YYYY-MM-DD HH:mm:ss')
+      item.update_time = dayjs(item.update_time).format('YYYY-MM-DD HH:mm:ss')
     })
     //返回数据
     res.cg('获取商品列表成功', 200, { total, data })
