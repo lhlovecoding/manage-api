@@ -56,10 +56,10 @@ exports.regUser = (req, res) => {
         },
         function (err, results) {
           // 执行 SQL 语句失败
-          if (err) res.cw(err, -1)
+          if (err) return res.cw(err, -1)
           // SQL 语句执行成功，但影响行数不为 1
           if (results.affectedRows !== 1) {
-            res.cw('注册用户失败，请稍后再试！', -2)
+            return res.cw('注册用户失败，请稍后再试！', -2)
           }
           //删除验证码
           const delCaptchaSql = `delete from captcha where mobile=? and code=?`
@@ -67,14 +67,14 @@ exports.regUser = (req, res) => {
             delCaptchaSql,
             [userinfo.mobile, userinfo.captcha],
             function (err, results) {
-              if (err) res.cw('删除验证码失败！', -1)
+              if (err) return res.cw('删除验证码失败！', -1)
               if (results.affectedRows !== 1) {
-                res.cw('删除验证码失败！', -2)
+                return res.cw('删除验证码失败！', -2)
               }
             }
           )
           // 注册成功
-          res.cg('注册成功！', 201, { id: results.insertId })
+          return res.cg('注册成功！', 201, { id: results.insertId })
         }
       )
     })
@@ -88,7 +88,7 @@ exports.login = (req, res) => {
   const userinfo = req.body
   new Promise((resolve, reject) => {
     const sql = `select * from user where username=?`
-     
+
     db.query(sql, userinfo.username, function (err, results) {
       // 执行 SQL 语句失败
       if (err) reject('查询用户失败！')
@@ -99,7 +99,6 @@ exports.login = (req, res) => {
     })
   })
     .then((user) => {
-        
       // 比对密码
       const compareResult = bcrypt.compareSync(userinfo.password, user.password)
       if (!compareResult) {
@@ -123,7 +122,7 @@ exports.login = (req, res) => {
       })
     })
     .catch((err) => {
-      res.cw(err)
+      return res.cw(err)
     })
 }
 // 获取验证码的处理函数
@@ -158,6 +157,6 @@ exports.getUserInfo = (req, res) => {
   db.query(sql, req.user.id, (err, results) => {
     if (err) return res.cw(err)
     if (results.length !== 1) return res.cw('获取用户信息失败！')
-    res.cg('获取用户信息成功！', 200, results[0])
+    return res.cg('获取用户信息成功！', 200, results[0])
   })
 }
