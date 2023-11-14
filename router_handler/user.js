@@ -134,9 +134,23 @@ exports.login = async (req, res) => {
       email: results.email,
       qq: results.qq,
     }
+    let expiresTime = 30 //默认30秒
+    switch (userinfo.expiresTime) {
+      case '1h':
+        expiresTime = 60 * 60
+        break
+      case '1d':
+        expiresTime = 60 * 60 * 24
+        break
+      case '1y':
+        expiresTime = 60 * 60 * 24 * 365
+        break
+      default:
+        break
+    }
     // 生成 Token 字符串
     const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
-      expiresIn: 60, // token 有效期为 10 分钟
+      expiresIn: expiresTime, // token 有效期为 10 分钟
     })
     return res.cg('登录成功！', 200, {
       // 为了方便客户端使用 Token，在服务器端直接拼接上 Bearer 的前缀

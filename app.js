@@ -10,7 +10,7 @@ const config = require('./config')
 const expressJWT = require('express-jwt')
 /** 导入路由 */
 const userRouter = require('./router/user')
-
+const goodsRouter = require('./router/goods')
 // 创建 express 的服务器实例
 const app = express()
 // 将 cors 注册为全局中间件
@@ -51,6 +51,7 @@ app.use(
 )
 // 将路由挂载到 app 服务中
 app.use('/api/user', userRouter)
+app.use('/api/goods', goodsRouter)
 // 调用 app.listen 方法，指定端口号并启动web服务器
 // 错误中间件
 app.use(function (err, req, res, next) {
