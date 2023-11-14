@@ -86,6 +86,7 @@ exports.regUser = (req, res) => {
 // 登录的处理函数
 exports.login = (req, res) => {
   const userinfo = req.body
+
   new Promise((resolve, reject) => {
     const sql = `select * from user where username=?`
     db.query(sql, userinfo.username, function (err, results) {
