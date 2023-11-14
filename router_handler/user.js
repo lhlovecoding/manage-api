@@ -8,43 +8,48 @@ const svgCaptcha = require('svg-captcha')
 const jwt = require('jsonwebtoken')
 const config = require('../config')
 // 注册用户的处理函数
-exports.regUser = (req, res) => {
-  // 接收表单数据
-  const userinfo = req.body
-  new Promise((resolve, reject) => {
-    //检查验证码是否正确 且时间是在1分钟内
+exports.regUser = async (req, res) => {
+  try {
+    const userinfo = req.body
+
+    // 检查验证码是否正确且时间是在1分钟内
     const getCaptchaSql = `select * from captcha where mobile=? and code=? and NOW() < captcha.created_at + INTERVAL 1 MINUTE`
-    db.query(
-      getCaptchaSql,
-      [userinfo.mobile, userinfo.captcha],
-      function (err, results) {
-        if (err) reject('验证码错误！', -1)
-        // SQL 语句执行成功，但影响行数不为 1
-        if (results.length !== 1) {
-          reject('验证码错误！', -2)
+    const results = await new Promise((resolve, reject) => {
+      db.query(
+        getCaptchaSql,
+        [userinfo.mobile, userinfo.captcha],
+        function (err, results) {
+          if (err) {
+            reject('验证码错误！', -1)
+          }
+          if (results.length !== 1) {
+            reject('验证码错误！', -2)
+          }
+          resolve(results)
         }
-        resolve()
-      }
-    )
-  })
-    .then(() => {
-      // 检测用户名是否被占用
+      )
+    })
+
+    // 检测用户名是否被占用
+    const userResults = await new Promise((resolve, reject) => {
       const sql = `select * from user where username=?`
       db.query(sql, [userinfo.username], function (err, results) {
-        // 执行 SQL 语句失败
         if (err) {
-          return res.cw('查询用户失败', -3)
+          reject('查询用户失败', -3)
         }
-        // 用户名被占用
         if (results.length > 0) {
-          return res.cw('用户名被占用，请更换其他用户名！', -4)
+          reject('用户名被占用，请更换其他用户名！', -4)
         }
+        resolve(results)
       })
     })
-    .then(() => {
-      // 对用户的密码,进行 bcrype 加密，返回值是加密之后的密码字符串
-      userinfo.password = bcrypt.hashSync(userinfo.password, 10)
-      const insertSql = 'insert into user set ?'
+
+    // 对用户的密码进行 bcrypt 加密
+    userinfo.password = bcrypt.hashSync(userinfo.password, 10)
+
+    // 插入用户数据
+    const insertSql = 'insert into user set ?'
+    const insertResult = await new Promise((resolve, reject) => {
       db.query(
         insertSql,
         {
@@ -55,36 +60,44 @@ exports.regUser = (req, res) => {
           qq: userinfo.qq,
         },
         function (err, results) {
-          // 执行 SQL 语句失败
-          if (err) return res.cw(err, -1)
-          // SQL 语句执行成功，但影响行数不为 1
-          if (results.affectedRows !== 1) {
-            return res.cw('注册用户失败，请稍后再试！', -2)
+          if (err) {
+            reject(err, -1)
           }
-          //删除验证码
-          const delCaptchaSql = `delete from captcha where mobile=? and code=?`
-          db.query(
-            delCaptchaSql,
-            [userinfo.mobile, userinfo.captcha],
-            (err, results) => {
-              if (err) return res.cw('删除验证码失败！', -1)
-              if (results.affectedRows !== 1) {
-                return res.cw('删除验证码失败！', -2)
-              }
-              // 注册成功
-              return res.send({
-                status: 201,
-                message: '注册成功！',
-                id: results.insertId,
-              })
-            }
-          )
+          if (results.affectedRows !== 1) {
+            reject('注册用户失败，请稍后再试！', -2)
+          }
+          resolve(results)
         }
       )
     })
-    .catch((err, code) => {
-      res.cw(err, code)
+
+    // 删除验证码
+    const delCaptchaSql = `delete from captcha where mobile=? and code=?`
+    const delCaptchaResult = await new Promise((resolve, reject) => {
+      db.query(
+        delCaptchaSql,
+        [userinfo.mobile, userinfo.captcha],
+        (err, results) => {
+          if (err) {
+            reject('删除验证码失败！', -1)
+          }
+          if (results.affectedRows !== 1) {
+            reject('删除验证码失败！', -2)
+          }
+          resolve(results)
+        }
+      )
     })
+    console.log(delCaptchaResult)
+    // 注册成功
+    return res.send({
+      status: 201,
+      message: '注册成功！',
+      id: insertResult.insertId,
+    })
+  } catch (error) {
+    return res.cw(error)
+  }
 }
 
 // 登录的处理函数
