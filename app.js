@@ -31,7 +31,6 @@ app.use(function (req, res, next) {
       message: msg,
       data,
     })
-    return
   }
   next()
 })

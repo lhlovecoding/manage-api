@@ -4,6 +4,9 @@
 const db = require('../db/index')
 const bcrypt = require('bcryptjs')
 const svgCaptcha = require('svg-captcha')
+// 用这个包来生成 Token 字符串
+const jwt = require('jsonwebtoken')
+const config = require('../config')
 // 注册用户的处理函数
 exports.regUser = (req, res) => {
   // 接收表单数据
@@ -30,13 +33,12 @@ exports.regUser = (req, res) => {
       db.query(sql, [userinfo.username], function (err, results) {
         // 执行 SQL 语句失败
         if (err) {
-          res.cw('查询用户失败', -3)
+          return res.cw('查询用户失败', -3)
         }
         // 用户名被占用
         if (results.length > 0) {
-          res.cw('用户名被占用，请更换其他用户名！', -4)
+          return res.cw('用户名被占用，请更换其他用户名！', -4)
         }
-        return
       })
     })
     .then(() => {
@@ -99,10 +101,21 @@ exports.login = (req, res) => {
       // 比对密码
       const compareResult = bcrypt.compareSync(userinfo.password, user.password)
       if (!compareResult) {
-        res.cw('登录失败！')
+        return res.cw('密码错误,登录失败！')
       }
       // 登录成功，生成 Token 字符串
-      console.log(user)
+      console.log(user, '+++')
+      const userinfo = {
+        username: user.username,
+        id: user.id,
+        mobile: user.mobile,
+        email: user.email,
+        qq: user.qq,
+      }
+      // 生成 Token 字符串
+      const tokenStr = jwt.sign(userinfo, config.jwtSecretKey, {
+        expiresIn: '10h', // token 有效期为 10 个小时
+      })
       // 登录成功
       res.cg('登录成功！')
     })
