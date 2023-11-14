@@ -71,10 +71,10 @@ exports.regUser = (req, res) => {
               if (results.affectedRows !== 1) {
                 return res.cw('删除验证码失败！', -2)
               }
+              // 注册成功
+              return res.cg('注册成功！', 201, { id: results.insertId })
             }
           )
-          // 注册成功
-          return res.cg('注册成功！', 201, { id: results.insertId })
         }
       )
     })
