@@ -104,8 +104,7 @@ exports.login = (req, res) => {
         return res.cw('密码错误,登录失败！')
       }
       // 登录成功，生成 Token 字符串
-      console.log(user, '+++')
-      const userinfo = {
+      const userdata = {
         username: user.username,
         id: user.id,
         mobile: user.mobile,
@@ -113,11 +112,13 @@ exports.login = (req, res) => {
         qq: user.qq,
       }
       // 生成 Token 字符串
-      const tokenStr = jwt.sign(userinfo, config.jwtSecretKey, {
-        expiresIn: '10h', // token 有效期为 10 个小时
+      const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
+        expiresIn: 5, // token 有效期为 10 个小时
       })
-      // 登录成功
-      res.cg('登录成功！')
+      return res.cg('登录成功！', 200, {
+        // 为了方便客户端使用 Token，在服务器端直接拼接上 Bearer 的前缀
+        token: 'Bearer ' + tokenStr,
+      })
     })
     .catch((err) => {
       res.cw(err)
