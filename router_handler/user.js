@@ -66,13 +66,17 @@ exports.regUser = (req, res) => {
           db.query(
             delCaptchaSql,
             [userinfo.mobile, userinfo.captcha],
-            function (err, results) {
+            (err, results) => {
               if (err) return res.cw('删除验证码失败！', -1)
               if (results.affectedRows !== 1) {
                 return res.cw('删除验证码失败！', -2)
               }
               // 注册成功
-              return res.cg('注册成功！', 201, { id: results.insertId })
+              return res.send({
+                status: 201,
+                message: '注册成功！',
+                id: results.insertId,
+              })
             }
           )
         }
