@@ -86,7 +86,6 @@ exports.regUser = (req, res) => {
 // 登录的处理函数
 exports.login = (req, res) => {
   const userinfo = req.body
- 
   new Promise((resolve, reject) => {
     const sql = `select * from user where username=?`
      
@@ -107,8 +106,7 @@ exports.login = (req, res) => {
         return res.cw('密码错误,登录失败！')
       }
       // 登录成功，生成 Token 字符串
-      console.log(user, '+++')
-      const userinfo = {
+      const userdata = {
         username: user.username,
         id: user.id,
         mobile: user.mobile,
@@ -116,11 +114,13 @@ exports.login = (req, res) => {
         qq: user.qq,
       }
       // 生成 Token 字符串
-      const tokenStr = jwt.sign(userinfo, config.jwtSecretKey, {
-        expiresIn: '10h', // token 有效期为 10 个小时
+      const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
+        expiresIn: 60, // token 有效期为 10 个小时
       })
-      // 登录成功
-      res.cg('登录成功！')
+      return res.cg('登录成功！', 200, {
+        // 为了方便客户端使用 Token，在服务器端直接拼接上 Bearer 的前缀
+        token: 'Bearer ' + tokenStr,
+      })
     })
     .catch((err) => {
       res.cw(err)
@@ -149,4 +149,15 @@ exports.getCaptcha = (req, res) => {
   res.setHeader('content-type', 'text/html;charset=utf-8;')
   //   res.setHeader("content-type", "image/svg+xml;");
   res.end(captcha.data)
+}
+
+//获取用户信息
+exports.getUserInfo = (req, res) => {
+  const sql =
+    'select id,username,email,mobile,qq,created_at,updated_at from user where id=?'
+  db.query(sql, req.user.id, (err, results) => {
+    if (err) return res.cw(err)
+    if (results.length !== 1) return res.cw('获取用户信息失败！')
+    res.cg('获取用户信息成功！', 200, results[0])
+  })
 }

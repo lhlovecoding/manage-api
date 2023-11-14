@@ -20,6 +20,9 @@ dependencies:
   express:
     specifier: ^4.17.1
     version: 4.18.2
+  express-jwt:
+    specifier: 5.3.3
+    version: 5.3.3
   joi:
     specifier: ^17.11.0
     version: 17.11.0
@@ -116,6 +119,10 @@ packages:
 
   /array-flatten@1.1.1:
     resolution: {integrity: sha1-ml9pkFGx5wczKPKgCJaLZOopVdI=}
+    dev: false
+
+  /async@1.5.2:
+    resolution: {integrity: sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=}
     dev: false
 
   /balanced-match@1.0.2:
@@ -302,6 +309,20 @@ packages:
   /etag@1.8.1:
     resolution: {integrity: sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /express-jwt@5.3.3:
+    resolution: {integrity: sha512-UdB8p5O8vGYTKm3SfREnLgVGIGEHcL3lrVyi3ebEX2qhMuagN623ju7ywWis+qYL+CXE7G1qPc2bCPBAg2MxZQ==}
+    engines: {node: '>= 0.4.0'}
+    dependencies:
+      async: 1.5.2
+      express-unless: 0.3.1
+      jsonwebtoken: 8.5.1
+      lodash.set: 4.3.2
+    dev: false
+
+  /express-unless@0.3.1:
+    resolution: {integrity: sha1-JVfBRudb65A+LSR/m1ugFFJpbiA=}
     dev: false
 
   /express@4.18.2:
@@ -563,6 +584,10 @@ packages:
 
   /lodash.once@4.1.1:
     resolution: {integrity: sha1-DdOXEhPHxW34gJd9UEyI+0cal6w=}
+    dev: false
+
+  /lodash.set@4.3.2:
+    resolution: {integrity: sha1-2HV7HagH3eJIFrDWqEvqGnYjCyM=}
     dev: false
 
   /lru-cache@6.0.0:
