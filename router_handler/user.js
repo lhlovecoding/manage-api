@@ -104,6 +104,7 @@ exports.regUser = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const userinfo = req.body
+    console.log(userinfo)
     const sql = `select * from user where username=?`
     const results = await new Promise((resolve, reject) => {
       db.query(sql, userinfo.username, function (err, results) {
@@ -137,18 +138,19 @@ exports.login = async (req, res) => {
     let expiresTime = 30 //默认30秒
     switch (userinfo.expiresTime) {
       case '1h':
-        expiresTime = 60 * 60
+        expiresTime = '1h'
         break
       case '1d':
-        expiresTime = 60 * 60 * 24
+        expiresTime = '1d'
         break
       case '1y':
-        expiresTime = 60 * 60 * 24 * 365
+        expiresTime = '1y'
         break
       default:
         break
     }
     // 生成 Token 字符串
+    console.log(expiresTime)
     const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
       expiresIn: expiresTime, // token 有效期为 10 分钟
     })

@@ -56,6 +56,12 @@ const captcha = joi
   .pattern(/^\w{4}$/)
   .required()
   .error(new Error('验证码不符合规则'))
+//不是必传，如果传必须是1h,1d,1y
+const expiresTime =
+  joi
+    .string()
+    .pattern(/^(1h|1d|1y)$/)
+    .error(new Error('expiresTime不符合规则')) || null
 // 注册和登录表单的验证规则对象
 exports.reg_reg_schema = {
   // 表示需要对 req.body 中的数据进行验证
@@ -77,5 +83,6 @@ exports.reg_login_schema = {
   body: {
     username,
     password,
+    expiresTime,
   },
 }
