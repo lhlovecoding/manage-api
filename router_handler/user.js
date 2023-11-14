@@ -86,8 +86,10 @@ exports.regUser = (req, res) => {
 // 登录的处理函数
 exports.login = (req, res) => {
   const userinfo = req.body
+ 
   new Promise((resolve, reject) => {
     const sql = `select * from user where username=?`
+     
     db.query(sql, userinfo.username, function (err, results) {
       // 执行 SQL 语句失败
       if (err) reject('查询用户失败！')
@@ -98,6 +100,7 @@ exports.login = (req, res) => {
     })
   })
     .then((user) => {
+        
       // 比对密码
       const compareResult = bcrypt.compareSync(userinfo.password, user.password)
       if (!compareResult) {
