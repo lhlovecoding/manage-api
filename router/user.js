@@ -22,4 +22,5 @@ router.post('/register', expressJoi(reg_reg_schema), userHandler.regUser)
 router.post('/login', expressJoi(reg_login_schema), userHandler.login)
 //获取验证码
 router.get('/captcha', expressJoi(reg_reg_mobile), userHandler.getCaptcha)
+router.get('/userinfo', userHandler.getUserInfo)
 module.exports = router

@@ -113,7 +113,7 @@ exports.login = (req, res) => {
       }
       // 生成 Token 字符串
       const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
-        expiresIn: 5, // token 有效期为 10 个小时
+        expiresIn: 60, // token 有效期为 10 个小时
       })
       return res.cg('登录成功！', 200, {
         // 为了方便客户端使用 Token，在服务器端直接拼接上 Bearer 的前缀
@@ -147,4 +147,15 @@ exports.getCaptcha = (req, res) => {
   res.setHeader('content-type', 'text/html;charset=utf-8;')
   //   res.setHeader("content-type", "image/svg+xml;");
   res.end(captcha.data)
+}
+
+//获取用户信息
+exports.getUserInfo = (req, res) => {
+  const sql =
+    'select id,username,email,mobile,qq,created_at,updated_at from user where id=?'
+  db.query(sql, req.user.id, (err, results) => {
+    if (err) return res.cw(err)
+    if (results.length !== 1) return res.cw('获取用户信息失败！')
+    res.cg('获取用户信息成功！', 200, results[0])
+  })
 }
