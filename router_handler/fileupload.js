@@ -39,7 +39,7 @@ exports.upload = async (req, res) => {
     if (results1.length !== 0) {
       return res.cg('上传成功', 200, {
         id: results1[0].id,
-        url: req.headers.host + '/uploads/' + results1[0].img_src,
+        url: 'https://' + req.headers.host + '/uploads/' + results1[0].img_src,
       })
     }
 
@@ -71,7 +71,7 @@ exports.upload = async (req, res) => {
     })
     res.cg('上传成功', 200, {
       id: results.insertId,
-      url: req.headers.host + '/uploads/' + fileName,
+      url: 'https://' + req.headers.host + '/uploads/' + fileName,
     })
   } catch (e) {
     res.cw(e)
