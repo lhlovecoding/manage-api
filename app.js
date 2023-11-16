@@ -12,11 +12,18 @@ const expressJWT = require('express-jwt')
 const userRouter = require('./router/user')
 const goodsRouter = require('./router/goods')
 const categoryRouter = require('./router/category')
+const fileUploadRouter = require('./router/fileupload')
+const fileUpload = require('express-fileupload')
+
 // 创建 express 的服务器实例
 const app = express()
+const path = require('path')
 // 将 cors 注册为全局中间件
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
+app.use(fileUpload())
+// 设置静态文件服务
+app.use(express.static(path.join(__dirname, 'public')))
 // write your code here...
 app.use(function (req, res, next) {
   // status = 0 为成功； status = 1 为失败； 默认将 status 的值设置为 1，方便处理失败的情况
@@ -47,6 +54,8 @@ app.use(
       '/api/user/register',
       '/api/user/login',
       '/api/user/captcha',
+      //排除图片资源的路径 uploads
+      /^\/uploads\/.*/,
     ],
   })
 )
@@ -54,6 +63,8 @@ app.use(
 app.use('/api/user', userRouter)
 app.use('/api/goods', goodsRouter)
 app.use('/api/category', categoryRouter)
+app.use('/api/upload', fileUploadRouter)
+
 // 调用 app.listen 方法，指定端口号并启动web服务器
 // 错误中间件
 app.use(function (err, req, res, next) {
