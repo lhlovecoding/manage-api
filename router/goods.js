@@ -3,6 +3,7 @@ const router = express.Router()
 
 // 导入用户路由处理函数模块
 const goodsHandler = require('../router_handler/goods')
+const categoryHandler = require('../router_handler/category')
 
 // 1. 导入验证表单数据的中间件
 const expressJoi = require('@escook/express-joi')
@@ -20,13 +21,15 @@ router.put(
 )
 router.delete('/:id', goodsHandler.deleteGoodsById)
 router.delete('/recycle/:id', goodsHandler.deleteRecycleGoodsById)
-//筛选商品
-// router.get('/search', goodsHandler.searchGoods)
-
-// router.post('/register', expressJoi(reg_reg_schema), goodsHandler.regUser)
-// // 登录
-// router.post('/login', expressJoi(reg_login_schema), goodsHandler.login)
-// //获取验证码
-// router.get('/captcha', expressJoi(reg_reg_mobile), goodsHandler.getCaptcha)
-// router.get('/userinfo', goodsHandler.getUserInfo)
+//分类接口
+//获取分类列表
+router.get('/category', categoryHandler.getCategory)
+//添加分类
+router.post('/category', categoryHandler.addCategory)
+//删除分类
+router.delete('/category/:id', categoryHandler.deleteCategory)
+//更新分类
+router.put('/category/:id', categoryHandler.updateCategory)
+//获取分类详情
+router.get('/category/:id', categoryHandler.getCategoryById)
 module.exports = router
