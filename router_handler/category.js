@@ -19,6 +19,15 @@ exports.getCategory = async (req, res) => {
 exports.addCategory = async (req, res) => {
   try {
     const { name } = req.body
+    //检查不能添加一样的分类
+    const sql1 = `select * from category where name=?`
+    const results1 = await new Promise((resolve, reject) => {
+      db.query(sql1, name, function (err, results) {
+        if (err) return reject(err)
+        if (results.length !== 0) return reject('分类已存在')
+        resolve(results)
+      })
+    })
     const sql = `insert into category set ?`
     const results = await new Promise((resolve, reject) => {
       db.query(sql, { name }, function (err, results) {

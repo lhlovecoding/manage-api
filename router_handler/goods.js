@@ -187,6 +187,7 @@ exports.deleteGoodsById = async (req, res) => {
     const results = await new Promise((resolve, reject) => {
       db.query(sql, id, function (err, results) {
         if (err) return reject(err)
+        console.log(err)
         if (results.affectedRows !== 1) return reject('商品放入回收站失败')
         resolve(results)
       })
@@ -201,6 +202,7 @@ exports.deleteGoodsById = async (req, res) => {
 //删除回收站的商品
 exports.deleteRecycleGoodsById = async (req, res) => {
   try {
+    console.log(req.params)
     //接收id参数
     const { id } = req.params
     //检查id
