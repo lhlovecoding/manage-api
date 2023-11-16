@@ -153,7 +153,7 @@ exports.recoverGoodsById = async (req, res) => {
     //检查id
     if (!id || isNaN(id)) return res.cw('商品id不合法')
     //构建sql
-    const sql = `update goods set status='on_shelf' where id=?`
+    const sql = `update goods set delete_time=null,status='on_shelf' where id=?`
     //执行sql
     const results = await new Promise((resolve, reject) => {
       db.query(sql, id, function (err, results) {
