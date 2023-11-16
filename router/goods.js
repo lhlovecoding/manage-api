@@ -20,4 +20,6 @@ router.put(
 )
 router.delete('/solt/:id', goodsHandler.deleteGoodsById)
 router.delete('/recycle/:id', goodsHandler.deleteRecycleGoodsById)
+//恢复商品
+router.patch('/:id', goodsHandler.recoverGoodsById)
 module.exports = router
