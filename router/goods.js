@@ -19,6 +19,7 @@ router.put(
   goodsHandler.updateGoodsById
 )
 router.delete('/:id', goodsHandler.deleteGoodsById)
+router.delete('/recycle/:id', goodsHandler.deleteRecycleGoodsById)
 //筛选商品
 // router.get('/search', goodsHandler.searchGoods)
 

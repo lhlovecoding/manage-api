@@ -29,6 +29,22 @@ exports.getGoods = async (req, res) => {
     if (params.start_time && params.end_time) {
       sql += `and create_time between '${params.start_time}' and '${params.end_time}' `
     }
+    //判断是否是出售中的商品
+    if (params.is_sale) {
+      sql += `and status='on_shelf' `
+    }
+    //判断是否已售罄的商品
+    if (params.is_stock) {
+      sql += `and stock=0 `
+    }
+    //判断是否是仓库中的商品
+    if (params.is_warehouse) {
+      sql += `and status='off_shelf' `
+    }
+    //判断是否是回收站的商品
+    if (params.is_recycle) {
+      sql += `and status='recycle_bin' `
+    }
     //排序
     sql += `order by sort desc`
     //计算总数
@@ -129,8 +145,61 @@ exports.updateGoodsById = async (req, res) => {
     return res.cw(error)
   }
 }
-//删除商品
+//恢复商品
+exports.recoverGoodsById = async (req, res) => {
+  try {
+    //接收id参数
+    const { id } = req.params
+    //检查id
+    if (!id || isNaN(id)) return res.cw('商品id不合法')
+    //构建sql
+    const sql = `update goods set status='on_shelf' where id=?`
+    //执行sql
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, id, function (err, results) {
+        if (err) return reject(err)
+        if (results.affectedRows !== 1) return reject('恢复商品失败')
+        resolve(results)
+      })
+    })
+    //返回数据
+    return res.cg('恢复商品成功', 200, { id })
+  } catch (error) {
+    return res.cw(error)
+  }
+}
+//删除商品到回收站
 exports.deleteGoodsById = async (req, res) => {
+  try {
+    //接收id参数
+    const { id } = req.params
+    //检查id
+    if (!id || isNaN(id)) return res.cw('商品id不合法')
+    //构建sql
+    // const sql = `delete from goods where id=?`
+    //软删除
+    //获取当前时间
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+    //设置删除时间和状态
+    const sql = `update goods set delete_time='${now}',status='recycle_bin' where id=?`
+    // const sql = `update goods set delete_time='${now}' where id=?`
+    //执行sql
+    const results = await new Promise((resolve, reject) => {
+      db.query(sql, id, function (err, results) {
+        if (err) return reject(err)
+        if (results.affectedRows !== 1) return reject('商品放入回收站失败')
+        resolve(results)
+      })
+    })
+    console.log(results)
+    //返回数据
+    return res.cg('商品放入回收站成功', 200, { id })
+  } catch (error) {
+    return res.cw(error)
+  }
+}
+//删除回收站的商品
+exports.deleteRecycleGoodsById = async (req, res) => {
   try {
     //接收id参数
     const { id } = req.params
@@ -146,7 +215,6 @@ exports.deleteGoodsById = async (req, res) => {
         resolve(results)
       })
     })
-    console.log(results)
     //返回数据
     return res.cg('删除商品成功', 200, { id })
   } catch (error) {
