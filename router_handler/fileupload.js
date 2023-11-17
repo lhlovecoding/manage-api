@@ -4,19 +4,19 @@ const db = require('../db/index')
 exports.upload = async (req, res) => {
   try {
     if (!req.files || !req.files.file) {
-      res.cw('没有上传文件.', 400)
+      return res.cw('没有上传文件.', 400)
     }
     const image = req.files.file
 
     // 检查文件类型是否为图片
     if (!image.mimetype.startsWith('image')) {
-      res.cw('只能上传图片类型的文件.', 400)
+      return res.cw('只能上传图片类型的文件.', 400)
     }
     //检查文件大小
     const fileSize = parseInt(image.size)
     //最大不能超过2M
     if (fileSize > 1024 * 1024 * 2) {
-      res.cw('图片大小不能超过2M.', 400)
+      return res.cw('图片大小不能超过2M.', 400)
     }
     //检查是否有uploads文件夹 没有就创建
     const fs = require('fs')
@@ -50,7 +50,7 @@ exports.upload = async (req, res) => {
     const imgdata = await new Promise((resolve, reject) => {
       image.mv(__dirname + '/../public/uploads/' + fileName, (err) => {
         if (err) {
-          res.cw(err)
+          return res.cw(err)
         }
         //获取当前的域名
         //记录文件的hash保存到数据库 以便下次有相同文件不在上传
@@ -58,6 +58,7 @@ exports.upload = async (req, res) => {
         resolve()
       })
     })
+    if (!imgdata) return res.cw('上传失败')
     let img_src = fileName
     //构建sql
     const sql = `insert into img set ?`
@@ -69,11 +70,12 @@ exports.upload = async (req, res) => {
         resolve(results)
       })
     })
-    res.cg('上传成功', 200, {
+    if (results.affectedRows !== 1) return res.cw('添加图片失败')
+    return res.cg('上传成功', 200, {
       id: results.insertId,
       url: 'https://' + req.headers.host + '/uploads/' + fileName,
     })
   } catch (e) {
-    res.cw(e)
+    return res.cw(e)
   }
 }
