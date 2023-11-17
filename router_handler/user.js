@@ -88,7 +88,6 @@ exports.regUser = async (req, res) => {
         }
       )
     })
-    console.log(delCaptchaResult)
     // 注册成功
     return res.send({
       status: 201,
@@ -104,7 +103,6 @@ exports.regUser = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const userinfo = req.body
-    console.log(userinfo)
     const sql = `select * from user where username=?`
     const results = await new Promise((resolve, reject) => {
       db.query(sql, userinfo.username, function (err, results) {
@@ -150,7 +148,6 @@ exports.login = async (req, res) => {
         break
     }
     // 生成 Token 字符串
-    console.log(expiresTime)
     const tokenStr = jwt.sign(userdata, config.jwtSecretKey, {
       expiresIn: expiresTime, // token 有效期为 10 分钟
     })
